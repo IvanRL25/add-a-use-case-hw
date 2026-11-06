@@ -1477,6 +1477,8 @@ Details:
   - 2a1. If the student was deleted or is outside the course admin's or instructor's authorized course section, the system denies access and does not disclose the student's details.
 - **3a. The course admin or instructor cancels the deactivation:**
   - 3a1. The system closes the confirmation without changing the student's account, and the use case ends.
+- **5a. The student is already deactivated:**
+  - 5a1. The system leaves the student's account unchanged and reports that the student is already deactivated.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle
