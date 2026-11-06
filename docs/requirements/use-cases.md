@@ -1475,6 +1475,8 @@ Details:
 **Extensions:**
 - **2a. The selected student is unavailable to the actor:**
   - 2a1. If the student was deleted or is outside the course admin's or instructor's authorized course section, the system denies access and does not disclose the student's details.
+- **3a. The course admin or instructor cancels the deactivation:**
+  - 3a1. The system closes the confirmation without changing the student's account, and the use case ends.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle
