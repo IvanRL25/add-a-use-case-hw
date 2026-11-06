@@ -1473,6 +1473,8 @@ Details:
 7. Use case ends.
 
 **Extensions:**
+- **2a. The selected student is unavailable to the actor:**
+  - 2a1. If the student was deleted or is outside the course admin's or instructor's authorized course section, the system denies access and does not disclose the student's details.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle
