@@ -16,39 +16,39 @@ Every protected request validates the account identified by its JWT against the 
 
 ```mermaid
 sequenceDiagram
-    actor Actor as Course admin / assigned instructor
-    participant List as Students.vue
-    participant Dialog as DeactivateStudentDialog
-    participant API as StudentController
-    participant Guard as StudentLifecycleAuthorizationManager
-    participant Service as StudentService
-    participant DB as StudentRepository
-    participant Auth as JWT active-account validator
+    actor CourseAdminOrInstructor
+    participant Students
+    participant DeactivateDialog
+    participant StudentController
+    participant LifecycleGuard
+    participant StudentService
+    participant StudentRepository
+    participant ActiveAccountJwtValidator
 
-    Actor->>List: Choose an active student (steps 1-3)
-    List->>Dialog: Present consequence and confirmation (step 4)
+    CourseAdminOrInstructor->>Students: Choose an active student (steps 1-3)
+    Students->>DeactivateDialog: Present consequence and confirmation (step 4)
     alt Actor cancels
-        Actor->>Dialog: Cancel (extension 3a)
-        Dialog-->>List: Close without request
+        CourseAdminOrInstructor->>DeactivateDialog: Cancel (extension 3a)
+        DeactivateDialog-->>Students: Close without request
     else Actor confirms
-        Actor->>Dialog: Confirm (step 5)
-        Dialog->>API: PATCH /students/{studentId}/deactivation
-        API->>Guard: Course-admin ownership or section-instructor assignment
-        Guard->>DB: Resolve actor scope and student
-        Guard-->>API: Allow or 403 (extensions 2a, 5b)
-        API->>Service: deactivateStudent(studentId)
-        Service->>DB: Scoped active-student lookup
+        CourseAdminOrInstructor->>DeactivateDialog: Confirm (step 5)
+        DeactivateDialog->>StudentController: PATCH deactivation
+        StudentController->>LifecycleGuard: Verify actor scope
+        LifecycleGuard->>StudentRepository: Resolve actor scope and student
+        LifecycleGuard-->>StudentController: Allow or 403
+        StudentController->>StudentService: deactivateStudent
+        StudentService->>StudentRepository: Scoped active-student lookup
         alt Student is active
-            Service->>DB: Set enabled=false and save
-            DB-->>API: Updated student
-            API-->>Dialog: 200 with disabled student (step 6)
+            StudentService->>StudentRepository: Set enabled=false and save
+            StudentRepository-->>StudentController: Updated student
+            StudentController-->>DeactivateDialog: 200 with disabled student
         else Student already disabled
-            Service-->>API: 409 Conflict (extension 5a)
+            StudentService-->>StudentController: 409 Conflict
         end
     end
 
-    Note over Auth: On every protected request, validate the JWT subject's enabled state
-    Auth-->>Actor: 401 if the account has been deactivated (extension 6a)
+    Note over ActiveAccountJwtValidator: Validate enabled state on every protected request
+    ActiveAccountJwtValidator-->>CourseAdminOrInstructor: 401 for a deactivated account
 ```
 
 ## Components and API
