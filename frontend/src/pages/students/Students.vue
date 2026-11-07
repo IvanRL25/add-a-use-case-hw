@@ -50,6 +50,7 @@
           ></el-button>
           <el-button
             v-if="row.enabled"
+            data-cy="deactivate-open"
             icon="Lock"
             circle
             plain

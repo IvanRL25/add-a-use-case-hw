@@ -1,12 +1,18 @@
 <template>
-  <el-dialog :model-value="visible" title="Deactivate student" width="460px" @update:model-value="emit('cancel')">
+  <el-dialog
+    :model-value="visible"
+    data-cy="deactivate-dialog"
+    title="Deactivate student"
+    width="460px"
+    @update:model-value="emit('cancel')"
+  >
     <p>
       Deactivating {{ student?.firstName }} {{ student?.lastName }} immediately revokes access to protected
       resources. The student's account, weekly activity reports, and peer evaluations are retained.
     </p>
     <template #footer>
-      <el-button @click="emit('cancel')">Cancel</el-button>
-      <el-button type="danger" @click="confirm">Deactivate</el-button>
+      <el-button data-cy="deactivate-cancel" @click="emit('cancel')">Cancel</el-button>
+      <el-button data-cy="deactivate-confirm" type="danger" @click="confirm">Deactivate</el-button>
     </template>
   </el-dialog>
 </template>
