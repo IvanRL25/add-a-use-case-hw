@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -45,6 +46,8 @@ class StudentServiceTest {
     PasswordEncoder passwordEncoder;
     @Mock
     UserUtils userUtils;
+    @Mock
+    StudentSecurityService studentSecurityService;
 
     @InjectMocks
     private StudentService studentService;
@@ -174,7 +177,7 @@ class StudentServiceTest {
         assertThat(result.getLastName()).isEqualTo(update.getLastName());
         assertThat(result.getEmail()).isEqualTo(update.getEmail());
 //        assertThat(result.getRoles()).isEqualTo(update.getRoles());
-        assertThat(result.isEnabled()).isEqualTo(update.isEnabled());
+        assertThat(result.isEnabled()).isNotEqualTo(update.isEnabled());
     }
 
     @Test
@@ -188,6 +191,31 @@ class StudentServiceTest {
 
         // Then
         verify(this.studentRepository, times(1)).deleteById(1);
+    }
+
+    @Test
+    void deactivatesAnAuthorizedActiveStudent() {
+        Student student = this.students.get(0);
+        given(this.studentSecurityService.canManageStudentLifecycle(1)).willReturn(true);
+        given(this.studentRepository.findById(1)).willReturn(Optional.of(student));
+        given(this.studentRepository.save(student)).willReturn(student);
+
+        Student result = this.studentService.deactivateStudent(1);
+
+        assertThat(result.isEnabled()).isFalse();
+        verify(this.studentRepository).save(student);
+    }
+
+    @Test
+    void rejectsAnAlreadyDeactivatedStudent() {
+        Student student = this.students.get(0);
+        student.setEnabled(false);
+        given(this.studentSecurityService.canManageStudentLifecycle(1)).willReturn(true);
+        given(this.studentRepository.findById(1)).willReturn(Optional.of(student));
+
+        assertThatThrownBy(() -> this.studentService.deactivateStudent(1))
+                .isInstanceOf(StudentAlreadyDeactivatedException.class);
+        verify(this.studentRepository, never()).save(any());
     }
 
 }
