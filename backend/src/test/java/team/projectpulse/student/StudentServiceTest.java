@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 import java.util.Map;
@@ -154,7 +155,7 @@ class StudentServiceTest {
     }
 
     @Test
-    void testInstructorUpdatesStudent() {
+    void generalStudentUpdateCannotChangeStatus() {
         // Given
         Student update = new Student("john", "John (updated)", "Smith (updated)", "j.smith@abc.edu (updated)", "", false, "admin student");
         given(this.studentRepository.findById(1)).willReturn(Optional.of(this.students.get(0)));
@@ -216,6 +217,15 @@ class StudentServiceTest {
         assertThatThrownBy(() -> this.studentService.deactivateStudent(1))
                 .isInstanceOf(StudentAlreadyDeactivatedException.class);
         verify(this.studentRepository, never()).save(any());
+    }
+
+    @Test
+    void rejectsDeactivationWhenTheActorIsOutsideTheStudentScope() {
+        given(this.studentSecurityService.canManageStudentLifecycle(1)).willReturn(false);
+
+        assertThatThrownBy(() -> this.studentService.deactivateStudent(1))
+                .isInstanceOf(AccessDeniedException.class);
+        verifyNoInteractions(this.studentRepository);
     }
 
 }
