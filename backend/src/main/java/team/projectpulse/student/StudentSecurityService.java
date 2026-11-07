@@ -47,4 +47,14 @@ public class StudentSecurityService {
                 .anyMatch(instructor -> instructor.getId().equals(instructorIdFromJwt));
     }
 
+    public boolean canManageStudentLifecycle(Integer studentId) {
+        Student student = this.studentRepository.findById(studentId).orElse(null);
+        if (student == null || student.getSection() == null || student.getSection().getCourse() == null) return false;
+        Integer userId = this.userUtils.getUserId();
+        if (userId == null) return false;
+        if (student.getSection().getCourse().getCourseAdmin() != null
+                && userId.equals(student.getSection().getCourse().getCourseAdmin().getId())) return true;
+        return student.getSection().getInstructors().stream().anyMatch(instructor -> userId.equals(instructor.getId()));
+    }
+
 }

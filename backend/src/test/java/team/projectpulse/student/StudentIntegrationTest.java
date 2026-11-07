@@ -3,6 +3,7 @@ package team.projectpulse.student;
 import tools.jackson.databind.json.JsonMapper;
 import team.projectpulse.AbstractIntegrationTest;
 import team.projectpulse.system.StatusCode;
+import team.projectpulse.student.StudentRepository;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,9 @@ class StudentIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     JsonMapper jsonMapper;
+
+    @Autowired
+    StudentRepository studentRepository;
 
     String adminToken;
 
@@ -268,6 +272,42 @@ class StudentIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN))
                 .andExpect(jsonPath("$.message").value("No permission."))
                 .andExpect(jsonPath("$.data").value("Access Denied"));
+    }
+
+    @Test
+    void adminDeactivatesStudentAndExistingTokenIsRejected() throws Exception {
+        this.mockMvc.perform(patch(this.baseUrl + "/students/4/deactivation")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, this.adminToken))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.data.enabled").value(false));
+
+        this.mockMvc.perform(get(this.baseUrl + "/students/4")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, this.studentJohnToken))
+                .andExpect(jsonPath("$.code").value(StatusCode.UNAUTHORIZED));
+    }
+
+    @Test
+    void rejectsDeactivationOutsideTheActorsCourse() throws Exception {
+        this.mockMvc.perform(patch(this.baseUrl + "/students/4/deactivation")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, this.adminTimToken))
+                .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN));
+        org.assertj.core.api.Assertions.assertThat(this.studentRepository.findById(4).orElseThrow().isEnabled()).isTrue();
+    }
+
+    @Test
+    void rejectsRepeatedDeactivation() throws Exception {
+        this.mockMvc.perform(patch(this.baseUrl + "/students/4/deactivation")
+                        .accept(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, this.adminToken))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS));
+
+        this.mockMvc.perform(patch(this.baseUrl + "/students/4/deactivation")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, this.adminToken))
+                .andExpect(jsonPath("$.code").value(StatusCode.CONFLICT));
     }
 
 //    @Test

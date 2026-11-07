@@ -90,7 +90,7 @@ No schema or migration is needed. The operation updates the existing `PeerEvalua
 | 2a / 5b unavailable or unauthorized | Integration | Out-of-scope, non-owning, or unassigned callers receive `403`; no student changes. |
 | 3a cancellation | Frontend component | Closing the dialog sends no request and leaves the status unchanged. |
 | 5a already deactivated | Unit and integration | A disabled student produces `409` with the specified message and no state change. |
-| 6a existing JWT after deactivation | Integration | A token issued before deactivation receives `401` on its next protected request; after reactivation and authentication, protected access is restored. |
+| 6a existing JWT after deactivation | Integration | A token issued before deactivation receives `401` on its next protected request. Access restoration after reactivation is verified when `UC-STU-reactivate-student` is designed and implemented. |
 
 ## Open questions / risks
 
