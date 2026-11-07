@@ -24,7 +24,8 @@ public class ActiveAccountJwtAuthenticationConverter implements Converter<Jwt, A
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
-        Integer userId = jwt.getClaim("userId");
+        Object userIdClaim = jwt.getClaim("userId");
+        Integer userId = userIdClaim instanceof Number number ? number.intValue() : null;
         if (userId == null || this.userRepository.findById(userId).filter(user -> user.isEnabled()).isEmpty()) {
             throw new InvalidBearerTokenException("The account is deactivated or unavailable.");
         }
