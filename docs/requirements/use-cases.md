@@ -1473,12 +1473,22 @@ Details:
 7. Use case ends.
 
 **Extensions:**
+- **2a. The selected student is unavailable to the actor:**
+  - 2a1. If the student was deleted or is outside the course admin's or instructor's authorized course section, the system denies access and does not disclose the student's details.
+- **3a. The course admin or instructor cancels the deactivation:**
+  - 3a1. The system closes the confirmation without changing the student's account, and the use case ends.
+- **5a. The student is already deactivated:**
+  - 5a1. The system leaves the student's account unchanged and reports that the student is already deactivated.
+- **5b. The actor is not authorized to deactivate the student:**
+  - 5b1. The system denies the request and leaves the student's account unchanged.
+- **6a. The deactivated student presents an existing access token:**
+  - 6a1. On the student's next protected request, the system verifies that the account remains active, rejects the request when it is deactivated, and requires authentication again after the account is reactivated.
 **Priority:** Low
 **Frequency of Use:** Rare. Occurs occasionally when a student withdraws from a course section.
 **Business Rules:** BR-student-lifecycle
 
 **Associated Information:**
-- Consequence of the deactivation: The student will no longer be able to log in or submit weekly activity reports and peer evaluations, but the student's account and her previously submitted work are kept in the system. Deactivation will NOT remove the student from the system, and the account can be reactivated in the future (UC-STU-reactivate-student: Reactivate a student). This is distinct from deletion (UC-STU-delete-student: Delete a student), which is a physical, unrecoverable delete. The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
+- Consequence of the deactivation: The student will no longer be able to log in or access protected resources, including submitting weekly activity reports and peer evaluations, but the student's account and her previously submitted work are kept in the system. Deactivation will NOT remove the student from the system, and the account can be reactivated in the future (UC-STU-reactivate-student: Reactivate a student). This is distinct from deletion (UC-STU-delete-student: Delete a student), which is a physical, unrecoverable delete. A deactivated student remains visible in student management with a Disabled status so an authorized actor can view the record and later reactivate it. The course admin or instructor shall be able to cancel the use case at any time prior to submitting it.
 
 **Related Use Cases:** UC-STU-delete-student: Delete a student; UC-STU-reactivate-student: Reactivate a student
 **Assumptions:**
