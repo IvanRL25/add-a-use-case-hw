@@ -48,6 +48,14 @@
             type="primary"
             @click.stop="showEditStudentDialog(row)"
           ></el-button>
+          <el-button
+            v-if="row.enabled"
+            icon="Lock"
+            circle
+            plain
+            type="danger"
+            @click.stop="showDeactivateDialog(row)"
+          ></el-button>
         </template>
       </el-table-column>
       <template #empty>
@@ -73,6 +81,12 @@
         @close-dialog="closeDialog"
       ></EditStudentForm>
     </el-dialog>
+    <DeactivateStudentDialog
+      :visible="deactivateDialogVisible"
+      :student="studentBeingDeactivated"
+      @cancel="deactivateDialogVisible = false"
+      @deactivated="closeDeactivateDialog"
+    />
   </el-card>
 </template>
 
@@ -86,6 +100,7 @@ import type {
 } from '@/apis/student/types'
 import { useSettingsStore } from '@/stores/settings'
 import EditStudentForm from './EditStudentForm.vue'
+import DeactivateStudentDialog from './DeactivateStudentDialog.vue'
 import { ElMessage } from 'element-plus'
 
 const searchCriteria = ref<StudentSearchCriteria>({
@@ -161,6 +176,19 @@ function showEditStudentDialog(student: Student) {
 
 function closeDialog() {
   dialogVisible.value = false
+  loadStudents()
+}
+
+const deactivateDialogVisible = ref(false)
+const studentBeingDeactivated = ref<Student>()
+
+function showDeactivateDialog(student: Student) {
+  studentBeingDeactivated.value = student
+  deactivateDialogVisible.value = true
+}
+
+function closeDeactivateDialog() {
+  deactivateDialogVisible.value = false
   loadStudents()
 }
 
